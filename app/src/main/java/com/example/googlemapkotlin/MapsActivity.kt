@@ -2,6 +2,7 @@ package com.example.googlemapkotlin
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 
@@ -12,6 +13,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.example.googlemapkotlin.databinding.ActivityMapsBinding
+import com.google.android.gms.maps.model.MapStyleOptions
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -61,5 +63,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         map.uiSettings.apply {
             isZoomControlsEnabled = true
         }
+
+        //Map Style
+        setMapStyle(googleMap = googleMap)
     }
+
+    private fun setMapStyle(googleMap: GoogleMap) {
+        try {
+            val success = googleMap.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(
+                    this, R.raw.style
+                )
+            )
+            if (!success) {
+                Log.d("Maps", "Failed to Add Styles")
+            }
+        } catch (e: Exception) {
+            Log.d("Maps", e.toString())
+        }
+    }
+
 }
