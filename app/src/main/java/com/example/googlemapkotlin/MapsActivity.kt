@@ -44,5 +44,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val sydney = LatLng(-34.0, 151.0)
         map.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
         map.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+
+        //UI Settings
+        map.uiSettings.apply {
+            isZoomControlsEnabled = true
+        }
     }
 }
