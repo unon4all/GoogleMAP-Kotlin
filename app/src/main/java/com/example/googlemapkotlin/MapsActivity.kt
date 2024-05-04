@@ -1,24 +1,32 @@
 package com.example.googlemapkotlin
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.example.googlemapkotlin.databinding.ActivityMapsBinding
+import com.example.googlemapkotlin.misc.CameraAndViewPort
+import com.example.googlemapkotlin.misc.TypeAndStyle
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.GoogleMap.CancelableCallback
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.example.googlemapkotlin.databinding.ActivityMapsBinding
-import com.google.android.gms.maps.model.MapStyleOptions
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var map: GoogleMap
     private lateinit var binding: ActivityMapsBinding
+
+    private val typeAndStyle by lazy { TypeAndStyle() }
+
+    private val cameraAndViewPort by lazy { CameraAndViewPort() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,15 +47,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.map -> map.mapType = GoogleMap.MAP_TYPE_NORMAL
-            R.id.hybrid_map -> map.mapType = GoogleMap.MAP_TYPE_HYBRID
-            R.id.none_map -> map.mapType = GoogleMap.MAP_TYPE_NONE
-            R.id.normal_map -> map.mapType = GoogleMap.MAP_TYPE_NORMAL
-            R.id.satellite_map -> map.mapType = GoogleMap.MAP_TYPE_SATELLITE
-            R.id.terrain_map -> map.mapType = GoogleMap.MAP_TYPE_TERRAIN
-        }
-
+        typeAndStyle.setMapType(map, item)
         return true
     }
 
@@ -55,9 +55,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         map = googleMap
 
         // Add a marker in Sydney and move the camera
-        val sydney = LatLng(-34.0, 151.0)
+        val sydney = LatLng(34.0522, -118.2437)
+        val newYork = LatLng(40.7128, -74.0060)
         map.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        map.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 10f))
+//        map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraAndViewPort.losAngles))
 
         //UI Settings
         map.uiSettings.apply {
@@ -65,22 +67,74 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         //Map Style
-        setMapStyle(googleMap = googleMap)
+        typeAndStyle.setMapStyle(googleMap = googleMap, context = this)
+
+//        googleMap.setMinZoomPreference(15f)
+//        googleMap.setMaxZoomPreference(20f)
+
+//        lifecycleScope.launch {
+//            delay(4000L)
+////            map.moveCamera(CameraUpdateFactory.zoomBy(3f))
+////            map.moveCamera(CameraUpdateFactory.newLatLng(newYork))
+////            map.moveCamera(CameraUpdateFactory.scrollBy(0f, 100f))
+////            map.moveCamera(
+////                CameraUpdateFactory.newLatLngBounds(
+////                    cameraAndViewPort.melbourneBounds, 100
+////                )
+////            )
+//
+////            map.animateCamera(
+////                CameraUpdateFactory.newLatLngBounds(
+////                    cameraAndViewPort.melbourneBounds, 100
+////                ), 5000, null
+////            )
+//
+//
+////            map.setLatLngBoundsForCameraTarget(cameraAndViewPort.melbourneBounds)
+//
+////            map.animateCamera(CameraUpdateFactory.zoomTo(15f), 2000, null)
+//
+//            map.animateCamera(
+//                CameraUpdateFactory.newCameraPosition(cameraAndViewPort.losAngles), 2000, null
+//            )
+//
+//            //CallBack method
+//
+//            map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraAndViewPort.losAngles),
+//                2000,
+//                object : CancelableCallback {
+//                    override fun onFinish() {
+//                        Toast.makeText(this@MapsActivity, "Finished", Toast.LENGTH_SHORT).show()
+//                    }
+//
+//                    override fun onCancel() {
+//                        Toast.makeText(this@MapsActivity, "Cancelled", Toast.LENGTH_SHORT).show()
+//                    }
+//
+//                })
+//        }
+
+        onMapClicked()
+        onMapLongClicked()
     }
 
-    private fun setMapStyle(googleMap: GoogleMap) {
-        try {
-            val success = googleMap.setMapStyle(
-                MapStyleOptions.loadRawResourceStyle(
-                    this, R.raw.style
-                )
-            )
-            if (!success) {
-                Log.d("Maps", "Failed to Add Styles")
-            }
-        } catch (e: Exception) {
-            Log.d("Maps", e.toString())
+
+    private fun onMapClicked() {
+
+        map.setOnMapClickListener {
+            Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show()
         }
+
+    }
+
+
+    private fun onMapLongClicked() {
+        map.setOnMapLongClickListener {
+            Toast.makeText(this, "${it.latitude}, ${it.longitude}", Toast.LENGTH_SHORT).show()
+            map.addMarker(MarkerOptions().position(it).title("New Marker"))
+        }
+
+
     }
 
 }
