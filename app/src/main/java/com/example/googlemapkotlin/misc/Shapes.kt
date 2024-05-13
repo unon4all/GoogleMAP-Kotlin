@@ -1,11 +1,19 @@
 package com.example.googlemapkotlin.misc
 
 import android.graphics.Color
+import com.example.googlemapkotlin.R
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CircleOptions
+import com.google.android.gms.maps.model.CustomCap
+import com.google.android.gms.maps.model.Dash
+import com.google.android.gms.maps.model.Dot
+import com.google.android.gms.maps.model.Gap
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolygonOptions
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.RoundCap
+import com.google.android.gms.maps.model.SquareCap
 import kotlinx.coroutines.delay
 
 class Shapes {
@@ -21,21 +29,27 @@ class Shapes {
     private val ahmednagar = LatLng(22.1987, 70.0543)
     private val auranabad = LatLng(22.1987, 70.0543)
 
-    private suspend fun addPolyLine(map: GoogleMap) {
+    suspend fun addPolyLine(map: GoogleMap) {
+
+//        val pattern = listOf(Dot(), Gap(30f), Dash(50f), Gap(30f))
 
         val polyLine = map.addPolyline(PolylineOptions().apply {
             add(pune, mumbai)
-            width(10f)
+            width(40f)
             color(Color.BLUE)
             geodesic(true)
             clickable(true)
+            jointType(2)
+            startCap(CustomCap(BitmapDescriptorFactory.fromResource(R.drawable.custom_marker),100f))
+            endCap(SquareCap())
+//            pattern(pattern)
         })
 
-        delay(5000)
-
-        val newList = listOf(pune, mumbai, delhi, agra, chennai)
-
-        polyLine.points = newList
+//        delay(5000)
+//
+//        val newList = listOf(pune, mumbai, delhi, agra, chennai)
+//
+//        polyLine.points = newList
 
     }
 

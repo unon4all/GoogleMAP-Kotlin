@@ -75,10 +75,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //Map Style
         typeAndStyle.setMapStyle(googleMap = googleMap, context = this)
 
-        //Shapes
-        shapes.addCircle(map)
 
-        lifecycleScope.launch {}
+        lifecycleScope.launch {
+            shapes.addPolyLine(map = map)
+        }
     }
 
 
