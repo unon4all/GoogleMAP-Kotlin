@@ -3,19 +3,23 @@ package com.example.googlemapkotlin
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.example.googlemapkotlin.databinding.ActivityMapsBinding
 import com.example.googlemapkotlin.misc.CameraAndViewPort
 import com.example.googlemapkotlin.misc.TypeAndStyle
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.GoogleMap.OnMarkerClickListener
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickListener {
 
     private lateinit var map: GoogleMap
     private lateinit var binding: ActivityMapsBinding
@@ -51,11 +55,21 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         map = googleMap
 
         // Add a marker in Sydney and move the camera
-        val sydney = LatLng(34.0522, -118.2437)
+        val pune = LatLng(18.5204, 73.8567)
+        val pune2 = LatLng(18.457872, 73.857959)
         val newYork = LatLng(40.7128, -74.0060)
-        map.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 10f))
-//        map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraAndViewPort.losAngles))
+
+        val puneMarker = map.addMarker(
+            MarkerOptions().position(pune).title("Marker in Pune")
+                .snippet("This is a Marker in Pune")
+        )
+
+        val puneMarker2 = map.addMarker(
+            MarkerOptions().position(pune2).title("Marker in Pune2").zIndex(1f)
+                .snippet("This is a Marker in Pune2")
+        )
+
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(pune, 10f))
 
         //UI Settings
         map.uiSettings.apply {
@@ -65,72 +79,22 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //Map Style
         typeAndStyle.setMapStyle(googleMap = googleMap, context = this)
 
-//        googleMap.setMinZoomPreference(15f)
-//        googleMap.setMaxZoomPreference(20f)
+        lifecycleScope.launch {
+            delay(4000L)
 
-//        lifecycleScope.launch {
-//            delay(4000L)
-////            map.moveCamera(CameraUpdateFactory.zoomBy(3f))
-////            map.moveCamera(CameraUpdateFactory.newLatLng(newYork))
-////            map.moveCamera(CameraUpdateFactory.scrollBy(0f, 100f))
-////            map.moveCamera(
-////                CameraUpdateFactory.newLatLngBounds(
-////                    cameraAndViewPort.melbourneBounds, 100
-////                )
-////            )
-//
-////            map.animateCamera(
-////                CameraUpdateFactory.newLatLngBounds(
-////                    cameraAndViewPort.melbourneBounds, 100
-////                ), 5000, null
-////            )
-//
-//
-////            map.setLatLngBoundsForCameraTarget(cameraAndViewPort.melbourneBounds)
-//
-////            map.animateCamera(CameraUpdateFactory.zoomTo(15f), 2000, null)
-//
-//            map.animateCamera(
-//                CameraUpdateFactory.newCameraPosition(cameraAndViewPort.losAngles), 2000, null
-//            )
-//
-//            //CallBack method
-//
-//            map.animateCamera(CameraUpdateFactory.newCameraPosition(cameraAndViewPort.losAngles),
-//                2000,
-//                object : CancelableCallback {
-//                    override fun onFinish() {
-//                        Toast.makeText(this@MapsActivity, "Finished", Toast.LENGTH_SHORT).show()
-//                    }
-//
-//                    override fun onCancel() {
-//                        Toast.makeText(this@MapsActivity, "Cancelled", Toast.LENGTH_SHORT).show()
-//                    }
-//
-//                })
-//        }
-
-        onMapClicked()
-        onMapLongClicked()
-    }
-
-
-    private fun onMapClicked() {
-
-        map.setOnMapClickListener {
-            Toast.makeText(this, "Clicked", Toast.LENGTH_SHORT).show()
         }
 
-    }
-
-
-    private fun onMapLongClicked() {
-        map.setOnMapLongClickListener {
-            Toast.makeText(this, "${it.latitude}, ${it.longitude}", Toast.LENGTH_SHORT).show()
-            map.addMarker(MarkerOptions().position(it).title("New Marker"))
-        }
-
+        map.setOnMarkerClickListener(this)
 
     }
+
+    override fun onMarkerClick(marker: Marker): Boolean {
+        map.animateCamera(CameraUpdateFactory.zoomTo(10f), 2000, null)
+        marker.showInfoWindow()
+        return true
+    }
+
 
 }
+
+
