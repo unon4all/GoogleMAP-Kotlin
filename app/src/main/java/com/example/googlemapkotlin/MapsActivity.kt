@@ -1,12 +1,14 @@
 package com.example.googlemapkotlin
 
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.googlemapkotlin.databinding.ActivityMapsBinding
 import com.example.googlemapkotlin.misc.CameraAndViewPort
+import com.example.googlemapkotlin.misc.OverLays
 import com.example.googlemapkotlin.misc.Shapes
 import com.example.googlemapkotlin.misc.TypeAndStyle
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -15,6 +17,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -25,6 +28,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val pune = LatLng(18.5204, 73.8567)
 
     private val shapes by lazy { Shapes() }
+    private val overlays by lazy { OverLays() }
 
     private val typeAndStyle by lazy { TypeAndStyle() }
 
@@ -75,12 +79,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //Map Style
         typeAndStyle.setMapStyle(googleMap = googleMap, context = this)
 
+        val groundOverlay = overlays.addGroundOverlayWithTag(map)
 
         lifecycleScope.launch {
-            shapes.addPolyLine(map = map)
+            delay(2000)
+            Log.d("TAG", groundOverlay?.tag.toString())
         }
     }
-
 
 }
 
