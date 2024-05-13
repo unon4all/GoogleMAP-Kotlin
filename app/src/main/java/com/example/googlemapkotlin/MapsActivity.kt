@@ -75,7 +75,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //Map Style
         typeAndStyle.setMapStyle(googleMap = googleMap, context = this)
 
-        shapes.addPolygon(map)
+        //Shapes
+        shapes.addCircle(map)
 
         lifecycleScope.launch {}
     }

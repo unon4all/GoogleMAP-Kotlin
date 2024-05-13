@@ -2,6 +2,7 @@ package com.example.googlemapkotlin.misc
 
 import android.graphics.Color
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolygonOptions
 import com.google.android.gms.maps.model.PolylineOptions
@@ -54,6 +55,20 @@ class Shapes {
              add(mumbai,chennai)
              strokeWidth(10f)
          })
+
+    }
+
+    fun addCircle(map: GoogleMap) {
+
+        val circle = map.addCircle(
+            CircleOptions().apply {
+                center(pune)
+                radius(2000.0)
+                fillColor(Color.RED)
+                strokeColor(Color.BLACK)
+                strokeWidth(10f)
+            }
+        )
 
     }
 
