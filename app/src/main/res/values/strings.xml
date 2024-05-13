@@ -6,4 +6,7 @@
     <string name="terrain">Terrain</string>
     <string name="satellite">Satellite</string>
     <string name="none">None</string>
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+    <string name="todo">TODO</string>
 </resources>

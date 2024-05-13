@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.googlemapkotlin.databinding.ActivityMapsBinding
 import com.example.googlemapkotlin.misc.CameraAndViewPort
+import com.example.googlemapkotlin.misc.CustomInfoAdapter
 import com.example.googlemapkotlin.misc.TypeAndStyle
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -85,6 +86,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, OnMarkerClickListe
         }
 
         map.setOnMarkerClickListener(this)
+
+        map.setInfoWindowAdapter(CustomInfoAdapter(this))
 
     }
 
