@@ -1,18 +1,14 @@
 package com.example.googlemapkotlin
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.content.pm.PackageManager
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.googlemapkotlin.databinding.ActivityMapsBinding
 import com.example.googlemapkotlin.misc.CameraAndViewPort
-import com.example.googlemapkotlin.misc.MyItem
 import com.example.googlemapkotlin.misc.OverLays
 import com.example.googlemapkotlin.misc.Shapes
 import com.example.googlemapkotlin.misc.TypeAndStyle
@@ -22,7 +18,11 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.maps.android.clustering.ClusterManager
+import com.google.android.gms.maps.model.TileOverlayOptions
+import com.google.maps.android.heatmaps.Gradient
+import com.google.maps.android.heatmaps.HeatmapTileProvider
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -38,7 +38,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val cameraAndViewPort by lazy { CameraAndViewPort() }
 
-    private lateinit var clusterManager: ClusterManager<MyItem>
 
     private val locationList = listOf(
         LatLng(18.5204, 73.8515),
@@ -51,27 +50,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         LatLng(18.5289, 73.8599),
     )
 
-    private val titleList = listOf(
-        "Pune",
-        "Pune",
-        "Pune",
-        "Pune",
-        "Pune",
-        "Pune",
-        "Pune",
-        "Pune",
-    )
-
-    private val snippetsList = listOf(
-        "This is a Marker in Pune",
-        "This is a Marker in Pune",
-        "This is a Marker in Pune",
-        "This is a Marker in Pune",
-        "This is a Marker in Pune",
-        "This is a Marker in Pune",
-        "This is a Marker in Pune",
-        "This is a Marker in Pune",
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -121,83 +99,39 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //Map Style
         typeAndStyle.setMapStyle(googleMap = googleMap, context = this)
 
-//        checkLocationPermission()
-
-
-//        val layer = GeoJsonLayer(
-//            map, R.raw.map, this
-//        )
-//
-//        layer.addLayerToMap()
-//
-//        val polygonStyle = layer.defaultPolygonStyle
-//        polygonStyle.apply {
-//            polygonStyle.fillColor = ContextCompat.getColor(this@MapsActivity, R.color.purple_200)
-//            polygonStyle.strokeColor = ContextCompat.getColor(this@MapsActivity, R.color.purple_700)
-//            polygonStyle.strokeWidth = 5f
-//        }
-//
-//        layer.setOnFeatureClickListener {
-//            Log.d("TAG", "onFeatureClick: ${it.id}")
-//        }
-//
-//        for (feature in layer.features) {
-//            Log.d("TAG", "onMapReady: ${feature.id}")
-//        }
-
-        clusterManager = ClusterManager(this, map)
-        map.setOnCameraIdleListener(clusterManager)
-        map.setOnMarkerClickListener(clusterManager)
-
-        addMarkers()
+        addHeatMap()
 
     }
 
-    private fun addMarkers() {
-        locationList.zip(titleList).zip(snippetsList).forEach { pair ->
-            val myItem =
-                MyItem(pair.first.first, "title: ${pair.first.second}", "Snippet: ${pair.second}")
-            clusterManager.addItem(myItem)
-        }
-    }
+    private fun addHeatMap() {
 
-    private fun checkLocationPermission() {
-
-        //Location Permission
-        if (ContextCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(
-                this, Manifest.permission.ACCESS_COARSE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            map.isMyLocationEnabled = true
-            Toast.makeText(this, "Already Enabled", Toast.LENGTH_SHORT).show()
-        } else {
-            requestPermissions()
-        }
-    }
-
-    private fun requestPermissions() {
-        ActivityCompat.requestPermissions(
-            this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 100
+        val colors = intArrayOf(
+            Color.rgb(255, 0, 0),
+            Color.rgb(0, 255, 0),
+            Color.rgb(0, 0, 255)
         )
+
+        val startPoints = floatArrayOf(0.2f, 0.4f, 0.6f)
+
+        val gradient = Gradient(colors, startPoints)
+
+        val provider = HeatmapTileProvider.Builder()
+            .data(locationList)
+            .build()
+
+
+        val overlay = map.addTileOverlay(TileOverlayOptions().tileProvider(provider))
+
+        lifecycleScope.launch {
+            delay(5000)
+            overlay?.clearTileCache()
+            provider.setGradient(gradient)
+            provider.setRadius(50)
+            provider.setOpacity(0.6)
+        }
     }
 
-    @SuppressLint("MissingPermission", "MissingSuperCall")
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
-    ) {
-        if (requestCode != 100) {
-            return
-        }
 
-        if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "Granted", Toast.LENGTH_SHORT).show()
-            map.isMyLocationEnabled = true
-        } else {
-            Toast.makeText(this, "Permission Needed !!!", Toast.LENGTH_SHORT).show()
-        }
-    }
 }
 
 
