@@ -4,7 +4,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -13,6 +12,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.googlemapkotlin.databinding.ActivityMapsBinding
 import com.example.googlemapkotlin.misc.CameraAndViewPort
+import com.example.googlemapkotlin.misc.MyItem
 import com.example.googlemapkotlin.misc.OverLays
 import com.example.googlemapkotlin.misc.Shapes
 import com.example.googlemapkotlin.misc.TypeAndStyle
@@ -22,7 +22,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.maps.android.data.geojson.GeoJsonLayer
+import com.google.maps.android.clustering.ClusterManager
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -37,6 +37,41 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private val typeAndStyle by lazy { TypeAndStyle() }
 
     private val cameraAndViewPort by lazy { CameraAndViewPort() }
+
+    private lateinit var clusterManager: ClusterManager<MyItem>
+
+    private val locationList = listOf(
+        LatLng(18.5204, 73.8515),
+        LatLng(18.5205, 73.8520),
+        LatLng(18.5210, 73.8525),
+        LatLng(18.5224, 73.8530),
+        LatLng(18.5245, 73.8566),
+        LatLng(18.5256, 73.8579),
+        LatLng(18.5278, 73.8588),
+        LatLng(18.5289, 73.8599),
+    )
+
+    private val titleList = listOf(
+        "Pune",
+        "Pune",
+        "Pune",
+        "Pune",
+        "Pune",
+        "Pune",
+        "Pune",
+        "Pune",
+    )
+
+    private val snippetsList = listOf(
+        "This is a Marker in Pune",
+        "This is a Marker in Pune",
+        "This is a Marker in Pune",
+        "This is a Marker in Pune",
+        "This is a Marker in Pune",
+        "This is a Marker in Pune",
+        "This is a Marker in Pune",
+        "This is a Marker in Pune",
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,6 +96,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         return true
     }
 
+    @SuppressLint("PotentialBehaviorOverride")
     override fun onMapReady(googleMap: GoogleMap) {
         map = googleMap
 
@@ -88,27 +124,41 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 //        checkLocationPermission()
 
 
-        val layer = GeoJsonLayer(
-            map, R.raw.map, this
-        )
+//        val layer = GeoJsonLayer(
+//            map, R.raw.map, this
+//        )
+//
+//        layer.addLayerToMap()
+//
+//        val polygonStyle = layer.defaultPolygonStyle
+//        polygonStyle.apply {
+//            polygonStyle.fillColor = ContextCompat.getColor(this@MapsActivity, R.color.purple_200)
+//            polygonStyle.strokeColor = ContextCompat.getColor(this@MapsActivity, R.color.purple_700)
+//            polygonStyle.strokeWidth = 5f
+//        }
+//
+//        layer.setOnFeatureClickListener {
+//            Log.d("TAG", "onFeatureClick: ${it.id}")
+//        }
+//
+//        for (feature in layer.features) {
+//            Log.d("TAG", "onMapReady: ${feature.id}")
+//        }
 
-        layer.addLayerToMap()
+        clusterManager = ClusterManager(this, map)
+        map.setOnCameraIdleListener(clusterManager)
+        map.setOnMarkerClickListener(clusterManager)
 
-        val polygonStyle = layer.defaultPolygonStyle
-        polygonStyle.apply {
-            polygonStyle.fillColor = ContextCompat.getColor(this@MapsActivity, R.color.purple_200)
-            polygonStyle.strokeColor = ContextCompat.getColor(this@MapsActivity, R.color.purple_700)
-            polygonStyle.strokeWidth = 5f
+        addMarkers()
+
+    }
+
+    private fun addMarkers() {
+        locationList.zip(titleList).zip(snippetsList).forEach { pair ->
+            val myItem =
+                MyItem(pair.first.first, "title: ${pair.first.second}", "Snippet: ${pair.second}")
+            clusterManager.addItem(myItem)
         }
-
-        layer.setOnFeatureClickListener {
-            Log.d("TAG", "onFeatureClick: ${it.id}")
-        }
-
-        for (feature in layer.features) {
-            Log.d("TAG", "onMapReady: ${feature.id}")
-        }
-
     }
 
     private fun checkLocationPermission() {
