@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
@@ -21,6 +22,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.maps.android.data.geojson.GeoJsonLayer
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -83,7 +85,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         //Map Style
         typeAndStyle.setMapStyle(googleMap = googleMap, context = this)
 
-        checkLocationPermission()
+//        checkLocationPermission()
+
+
+        val layer = GeoJsonLayer(
+            map, R.raw.map, this
+        )
+
+        layer.addLayerToMap()
+
+        val polygonStyle = layer.defaultPolygonStyle
+        polygonStyle.apply {
+            polygonStyle.fillColor = ContextCompat.getColor(this@MapsActivity, R.color.purple_200)
+            polygonStyle.strokeColor = ContextCompat.getColor(this@MapsActivity, R.color.purple_700)
+            polygonStyle.strokeWidth = 5f
+        }
+
+        layer.setOnFeatureClickListener {
+            Log.d("TAG", "onFeatureClick: ${it.id}")
+        }
+
+        for (feature in layer.features) {
+            Log.d("TAG", "onMapReady: ${feature.id}")
+        }
 
     }
 

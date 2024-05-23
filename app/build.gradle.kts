@@ -67,6 +67,11 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+//    implementation(libs.maps.util.ktx)
+
+    //Util
+    implementation(libs.android.maps.utils)
+
     implementation(libs.maps.compose)
 
 }
